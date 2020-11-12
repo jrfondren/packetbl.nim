@@ -82,9 +82,9 @@ proc readConfig(path: string) =
       if queueNo >= 0:
         quit &"packetbl: {path}({lineNo}): duplicate `queue` config"
       queueNo = m.group(0, line)[0].parseInt
-    elif line.match(re"^blacklist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9])\s*(?:#.*)?$", m):
+    elif line.match(re"^blacklist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\s*(?:#.*)?$", m):
       blconfig.incl m.group(0, line)[0].parseIPv4
-    elif line.match(re"^whitelist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9])\s*(?:#.*)?$", m):
+    elif line.match(re"^whitelist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\s*(?:#.*)?$", m):
       wlconfig.incl m.group(0, line)[0].parseIPv4
     elif line.match(re"^\s*(?:#.*)?$"):
       discard
