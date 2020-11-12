@@ -36,8 +36,8 @@ proc canResolve(host: string): bool =
   return false
 
 proc blacklisted(ip: PacketInfo): bool =
-  if ip.ip in wlconfig: return true
-  if ip.ip in blconfig: return false
+  if ip.ip in wlconfig: return false
+  if ip.ip in blconfig: return true
   if ip.ip in cache: return cache[ip.ip]
   for rbl in rbls:
     let host = &"{ip.ip[3]}.{ip.ip[2]}.{ip.ip[1]}.{ip.ip[0]}.{rbl}"
