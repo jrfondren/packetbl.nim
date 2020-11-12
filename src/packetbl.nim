@@ -1,6 +1,6 @@
 import std/[strformat, strutils, sequtils, tables, sets]
-import std/[posix, re]
-import libnetfilter_queue, lrucache
+import std/posix
+import libnetfilter_queue, lrucache, regex
 
 proc c_signal(sig: cint, handler: proc (a: cint) {.noconv.}) {.importc: "signal", header: "<signal.h>".}
 
@@ -74,18 +74,19 @@ func parseIPv4(ip: string): IPv4 =
 
 proc readConfig(path: string) =
   var lineNo = 1
+  var m: RegexMatch
   for line in path.lines:
-    if line =~ re"^rbl\s+([\w.-]+)\s*(#.*)?$":
-      rbls.add matches[0]
-    elif line =~ re"^queue\s+(\d+)\s*(#.*)?$":
+    if line.match(re"^rbl\s+([\w.-]+)\s*(?:#.*)?$", m):
+      rbls.add m.group(0, line)[0]
+    elif line.match(re"^queue\s+(\d+)\s*(?:#.*)?$", m):
       if queueNo >= 0:
         quit &"packetbl: {path}({lineNo}): duplicate `queue` config"
-      queueNo = matches[0].parseInt
-    elif line =~ re"^blacklist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9])\s*(#.*)?$":
-      blconfig.incl matches[0].parseIPv4
-    elif line =~ re"^whitelist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9])\s*(#.*)?$":
-      wlconfig.incl matches[0].parseIPv4
-    elif line =~ re"^\s*(#.*)?$":
+      queueNo = m.group(0, line)[0].parseInt
+    elif line.match(re"^blacklist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9])\s*(?:#.*)?$", m):
+      blconfig.incl m.group(0, line)[0].parseIPv4
+    elif line.match(re"^whitelist\s+([0-9]+\.[0-9]+\.[0-9]+\.[0-9])\s*(?:#.*)?$", m):
+      wlconfig.incl m.group(0, line)[0].parseIPv4
+    elif line.match(re"^\s*(?:#.*)?$"):
       discard
     else:
       quit &"packetbl: {path}({lineNo}): didn't understand config line: {line}"
